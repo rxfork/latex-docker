@@ -19,4 +19,6 @@ COPY \
 
 RUN /setup.sh ${scheme}
 
+RUN apk --no-cache add pandoc
+
 CMD ["/bin/bash"]
