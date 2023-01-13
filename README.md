@@ -9,13 +9,7 @@ Docker Image of [TeXLive](http://tug.org/texlive/).
 * [Full TeXLive](https://github.com/users/xu-cheng/packages/container/package/texlive-full)
 
 ```bash
-docker pull ghcr.io/xu-cheng/texlive-full:latest
-```
-
-* [Small TeXLive](https://github.com/users/xu-cheng/packages/container/package/texlive-small)
-
-```bash
-docker pull ghcr.io/xu-cheng/texlive-small:latest
+docker razorx/rxfork-latex-docker:texlive-full
 ```
 
 ## See Also
