@@ -4,7 +4,7 @@
 [![GitHub Actions Status](https://github.com/xu-cheng/latex-docker/workflows/Build%20Docker%20Image/badge.svg)](https://github.com/xu-cheng/latex-docker/actions)
 
 > [!TIP]
-> This is just a fork of [latex-docker](https://github.com/xu-cheng/latex-docker) with pandoc installed in the Docker Image.
+> This is just a fork of https://github.com/xu-cheng/latex-docker with pandoc installed in the Docker Image.
 
 Docker Image of [TeXLive](https://tug.org/texlive/).
 
