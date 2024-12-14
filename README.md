@@ -3,10 +3,10 @@
 [![Docker Hub](https://img.shields.io/docker/pulls/razorx/rxfork-latex-docker)](https://hub.docker.com/r/razorx/rxfork-latex-docker)
 [![GitHub Actions Status](https://github.com/xu-cheng/latex-docker/workflows/Build%20Docker%20Image/badge.svg)](https://github.com/xu-cheng/latex-docker/actions)
 
-Docker Image of [TeXLive](https://tug.org/texlive/).
-
 > [!TIP]
 > This is just a fork of [latex-docker](https://github.com/xu-cheng/latex-docker) with pandoc installed in the Docker Image.
+
+Docker Image of [TeXLive](https://tug.org/texlive/).
 
 ## To use the images
 
