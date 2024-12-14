@@ -1,7 +1,6 @@
 #!/bin/sh
 
 set -e
-set -o pipefail
 
 scheme="$1"
 
@@ -27,12 +26,15 @@ retry() {
 echo "==> Install system packages"
 apk --no-cache add \
   bash \
+  curl \
   fontconfig \
   ghostscript \
   gnupg \
+  gnuplot \
+  git \
   graphviz \
   make \
-  openjdk11-jre-headless \
+  openjdk21-jre-headless \
   perl \
   py-pygments \
   python3 \
@@ -45,23 +47,23 @@ apk --no-cache add \
 apk --no-cache add \
   perl-unicode-linebreak \
   perl-yaml-tiny
-apk --no-cache add \
-  --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing \
+apk --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/testing add \
   perl-file-homedir
 
 echo "==> Install TeXLive"
 mkdir -p /tmp/install-tl
 cd /tmp/install-tl
-MIRROR_URL="$(wget -q -S -O /dev/null http://mirror.ctan.org/ 2>&1 | sed -ne 's/.*Location: \(\w*\)/\1/p' | head -n 1)"
-wget -nv "${MIRROR_URL}systems/texlive/tlnet/install-tl-unx.tar.gz"
-wget -nv "${MIRROR_URL}systems/texlive/tlnet/install-tl-unx.tar.gz.sha512"
-wget -nv "${MIRROR_URL}systems/texlive/tlnet/install-tl-unx.tar.gz.sha512.asc"
-gpg --no-default-keyring --keyring trustedkeys.kbx --import /texlive_pgp_keys.asc
-gpgv ./install-tl-unx.tar.gz.sha512.asc ./install-tl-unx.tar.gz.sha512
+MIRROR_URL="$(curl -fsS -w "%{redirect_url}" -o /dev/null https://mirror.ctan.org/)"
+echo "Use mirror url: ${MIRROR_URL}"
+curl -fsSOL "${MIRROR_URL}systems/texlive/tlnet/install-tl-unx.tar.gz"
+curl -fsSOL "${MIRROR_URL}systems/texlive/tlnet/install-tl-unx.tar.gz.sha512"
+curl -fsSOL "${MIRROR_URL}systems/texlive/tlnet/install-tl-unx.tar.gz.sha512.asc"
+gpg --import /texlive_pgp_keys.asc
+gpg --verify ./install-tl-unx.tar.gz.sha512.asc ./install-tl-unx.tar.gz.sha512
 sha512sum -c ./install-tl-unx.tar.gz.sha512
 mkdir -p /tmp/install-tl/installer
 tar --strip-components 1 -zxf /tmp/install-tl/install-tl-unx.tar.gz -C /tmp/install-tl/installer
-retry 3 /tmp/install-tl/installer/install-tl -scheme "$scheme" -profile=/texlive.profile
+retry 3 /tmp/install-tl/installer/install-tl -scheme "scheme-$scheme" -profile=/texlive.profile
 
 # Install additional packages for non full scheme
 if [ "$scheme" != "full" ]; then
@@ -71,8 +73,20 @@ if [ "$scheme" != "full" ]; then
     biber \
     biblatex \
     latexmk \
-    texliveonfly
+    texliveonfly \
+    xindy
 fi
+
+# https://github.com/xu-cheng/latex-action/issues/32#issuecomment-626086551
+ln -sf /opt/texlive/texdir/texmf-dist/scripts/xindy/xindy.pl /opt/texlive/texdir/bin/x86_64-linuxmusl/xindy
+ln -sf /opt/texlive/texdir/texmf-dist/scripts/xindy/texindy.pl /opt/texlive/texdir/bin/x86_64-linuxmusl/texindy
+curl -OL https://sourceforge.net/projects/xindy/files/xindy-source-components/2.4/xindy-kernel-3.0.tar.gz
+tar xf xindy-kernel-3.0.tar.gz
+cd xindy-kernel-3.0/src
+apk add clisp --no-cache --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community
+make
+cp -f xindy.mem /opt/texlive/texdir/bin/x86_64-linuxmusl/
+cd -
 
 # System font configuration for XeTeX and LuaTeX
 # Ref: https://www.tug.org/texlive/doc/texlive-en/texlive-en.html#x1-330003.4.4
@@ -86,7 +100,6 @@ rm -rf \
   /opt/texlive/texdir/texmf-dist/doc \
   /opt/texlive/texdir/texmf-dist/source \
   /opt/texlive/texdir/texmf-var/web2c/tlmgr.log \
-  /root/.gnupg \
   /setup.sh \
   /texlive.profile \
   /texlive_pgp_keys.asc \
